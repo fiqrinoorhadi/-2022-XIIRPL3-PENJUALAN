@@ -68,27 +68,49 @@ if (isset($_POST['simpan']))
     //Alternatif query SQL untuk insert data, dengan menyebutkan nama kolom dari tabel barang
     // $sql = "INSERT INTO barang (nama_barang,harga_barang,stok_barang,supplier)
     //         VALUES ('$nb','$hb','$sb','$sp')";
-
-    //Alternatif query SQL untuk insert data, tanpa menyebutkan nama kolom dari tabel barang
-    $sql = "INSERT INTO barang VALUES ('','$nb','$hb','$sb','$sp')";
-
-    //Perintah untuk mengeksekusi query sql yang sebelumnya dibuat di baris program sebelumnya
-    $insert = mysqli_query($koneksi,$sql);
-
-    //Struktur kontrol "if" untuk pengecekan keberhasilan eksekusi query sql, apakah gagal atau berhasil
-    if (!$insert) 
+    if (isset($_GET['proses'])) 
     {
-        $status = 'gagal';
-        $pesan1 = 'Data GAGAL di SIMPAN';
-        $pesan2 = 'Cek lagi, mungkin ada kode program yang salah !!!';
+        if ($_GET['proses']=='edit') {
+            $id = $_GET['id'];
+            $sql = "UPDATE barang SET nama_barang = '$nb',
+            harga_barang =  '$hb', stok_barang = '$sb', supplier = '$sp'
+            WHERE id = '$id' ";
+            $update = mysqli_query($koneksi,$sql);
+            if (!$update) {
+                $status = 'gagal';
+                $pesan1 = 'Data Gagal di UPDATE';
+                $pesan2 = 'Cek lagi program anda';
+            }
+            else
+            {
+                $status = 'sukses';
+                $pesan1 = 'Data Berhasil di UPDATE';
+                $pesan2 = 'Alhamdulillah berhasil di update';
+            }
+        }
     }
     else
     {
-        $status = 'sukses';
-        $pesan1 = 'Data BERHASIL di SIMPAN';
-        $pesan2 = 'Selamat, data anda sudah tersimpan di DATABASE !!!';
-    }
+        //Alternatif query SQL untuk insert data, tanpa menyebutkan nama kolom dari tabel barang
+        $sql = "INSERT INTO barang VALUES ('','$nb','$hb','$sb','$sp')";
 
+        //Perintah untuk mengeksekusi query sql yang sebelumnya dibuat di baris program sebelumnya
+        $insert = mysqli_query($koneksi,$sql);
+
+        //Struktur kontrol "if" untuk pengecekan keberhasilan eksekusi query sql, apakah gagal atau berhasil
+        if (!$insert) 
+        {
+            $status = 'gagal';
+            $pesan1 = 'Data GAGAL di SIMPAN';
+            $pesan2 = 'Cek lagi, mungkin ada kode program yang salah !!!';
+        }
+        else
+        {
+            $status = 'sukses';
+            $pesan1 = 'Data BERHASIL di SIMPAN';
+            $pesan2 = 'Selamat, data anda sudah tersimpan di DATABASE !!!';
+        }
+    } //ini
 }
 ?>
 
@@ -112,21 +134,27 @@ if (isset($_POST['simpan']))
                     //isi $status akan berubah ketika proses dari insert data berhasil(lihat kembali baris program eksekusi query slq insert data)
                     if ($status == 'sukses' ) 
                     {
-                    ?>
+                        ?>
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <strong><?php echo $pesan1 ?></strong> <?php echo $pesan2 ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            <strong><?php echo $pesan1 ?></strong> <?php echo $pesan2 ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
-                    <?php
+                        <script type="text/JavaScript">
+                            setTimeout("location.href = 'http://localhost/01-penjualan-fiqri/barang.php';", 1500);
+                        </script>
+                        <?php
                     }
                     if ($status == 'gagal' ) 
                     {
-                    ?>
+                        ?>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong><?php echo $pesan1 ?></strong> <?php echo $pesan2 ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                      </div>
-                    <?php
+                            <strong><?php echo $pesan1 ?></strong> <?php echo $pesan2 ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        <script type="text/JavaScript">
+                            setTimeout("location.href = 'http://localhost/01-penjualan-fiqri/barang.php';", 1500);
+                        </script>
+                        <?php
                     }
                     ?>
 
