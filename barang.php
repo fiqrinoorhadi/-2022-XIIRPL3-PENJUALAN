@@ -2,8 +2,57 @@
 //Memanggil script code koneksi database dari file koneksi.php
 include('koneksi.php');
 
-//Variabel kosong, untuk menghindari error karena variable $status digunakan tanpa ada deklarasi variable sebelumnya 
+//Variabel kosong, untuk menghindari error karena variable $status dan variable dibawahnya($nb,$hb,$sb,$sp) digunakan tanpa ada deklarasi variable sebelumnya 
 $status = '';
+$nb = '';
+$hb = '';
+$sb = '';
+$sp = '';
+
+//struktur kontrol 'if' mengecek keberadaan index 'proses' diurl browser, jika ada maka jalankan program di dalamnya
+if (isset($_GET['proses'])) 
+{
+    //struktur kontrol 'if' mengecek isi dari index 'proses'. Jika isinya adalah 'delete', maka jalankan program didalammnya
+    if ($_GET['proses']=='delete') 
+    {
+        //menggunakan method GET, ambil data index 'id' di url browser dan simpan pada variable $id
+        $id = $_GET['id'];
+
+        //simpan sebuah query delete kedalam variable baru yaitu variable $sql 
+        $sql = "DELETE FROM barang WHERE id = '$id'";
+
+        //jalankan perintah eksekusi query menggunakan mysqli_query dan simpan pada variable baru yaitu $delete
+        $delete = mysqli_query($koneksi,$sql);
+
+        //struktur kontrol 'if' mengecek keberhasilan eksekusi query di variable $delete, apakah berhasil atau tidak
+        if (!$delete) 
+        {
+            $status = 'delete';
+            $pesan1 = 'Data GAGAL di DELETE';
+            $pesan2 = 'Cek lagi, mungkin ada kode program yang salah !!!';
+        }
+        else
+        {
+            $status = 'sukses';
+            $pesan1 = 'Data BERHASIL di DELETE';
+            $pesan2 = 'Mudah-mudahan datanya terhapus di DATABASE !!!';
+
+        }
+
+    }
+
+    if ($_GET['proses']=='edit') 
+    {
+        $id = $_GET['id'];
+        $sql = "SELECT * FROM barang WHERE id = '$id'";
+        $select = mysqli_query($koneksi,$sql);
+        $data = mysqli_fetch_assoc($select);
+        $nb = $data['nama_barang'];
+        $hb = $data['harga_barang'];
+        $sb = $data['stok_barang'];
+        $sp = $data['supplier'];
+    }
+}
 
 //Struktur kontrol "if" untuk mengeksekusi baris program didalamnya, ketika tombol submit form input di tekan
 if (isset($_POST['simpan'])) 
@@ -30,10 +79,14 @@ if (isset($_POST['simpan']))
     if (!$insert) 
     {
         $status = 'gagal';
+        $pesan1 = 'Data GAGAL di SIMPAN';
+        $pesan2 = 'Cek lagi, mungkin ada kode program yang salah !!!';
     }
     else
     {
         $status = 'sukses';
+        $pesan1 = 'Data BERHASIL di SIMPAN';
+        $pesan2 = 'Selamat, data anda sudah tersimpan di DATABASE !!!';
     }
 
 }
@@ -61,7 +114,7 @@ if (isset($_POST['simpan']))
                     {
                     ?>
                         <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Data Berhasil Disimpan</strong> Mudah-mudahan datanya tersimpan di database.
+                        <strong><?php echo $pesan1 ?></strong> <?php echo $pesan2 ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     <?php
@@ -70,7 +123,7 @@ if (isset($_POST['simpan']))
                     {
                     ?>
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <strong>Data Gagal Disimpan</strong> Silahkan periksa kembali program anda.
+                        <strong><?php echo $pesan1 ?></strong> <?php echo $pesan2 ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                       </div>
                     <?php
@@ -92,19 +145,19 @@ if (isset($_POST['simpan']))
                     <div class="card-body">
                         <form action="" method="post">
                             <div class="form-floating mb-2">
-                                <input class="form-control" type="text" name="nama_barang" id="nama_barang" placeholder="komputer" required>
+                                <input value="<?php echo $nb ?>" class="form-control" type="text" name="nama_barang" id="nama_barang" placeholder="komputer" required>
                                 <label class="form-label" for="nama_barang">Nama Barang</label>
                             </div>
                             <div class="form-floating mb-2">
-                                <input class="form-control" type="text" name="harga_barang" id="harga_barang" placeholder="1000000" required>
+                                <input value="<?php echo $hb ?>" class="form-control" type="text" name="harga_barang" id="harga_barang" placeholder="1000000" required>
                                 <label class="form-label" for="harga_barang">Harga Barang</label>
                             </div>
                             <div class="form-floating mb-2">
-                                <input class="form-control" type="text" name="stok_barang" id="stok_barang" placeholder="100" required>
+                                <input value="<?php echo $sb ?>" class="form-control" type="text" name="stok_barang" id="stok_barang" placeholder="100" required>
                                 <label class="form-label" for="stok_barang">Stok Barang</label>
                             </div>
                             <div class="form-floating mb-2">
-                                <input class="form-control" type="text" name="supplier" id="supplier" placeholder="PT. Jaya Abadi" required>
+                                <input value="<?php echo $sp ?>" class="form-control" type="text" name="supplier" id="supplier" placeholder="PT. Jaya Abadi" required>
                                 <label class="form-label" for="supplier">Supplier</label>
                             </div>
                             <button class="btn btn-primary" type="submit" name="simpan">Simpan</button>
@@ -126,19 +179,39 @@ if (isset($_POST['simpan']))
                         <th>Stok Barang</th>
                         <th>Suplier</th>
                     </tr>
+                    <?php
+                    $sql = "SELECT * FROM barang";
+                    $select = mysqli_query($koneksi,$sql);
+
+                    //variabel untuk nilai awal nomor urut tabel
+                    $urut = 1;
+
+                    // convert hasil query ke variable data array  
+                    while($data = mysqli_fetch_assoc($select))
+                    {
+                    ?>
                     <tr>
-                        <td>1</td>
-                        <td>Komputer</td>
-                        <td>20000000</td>
-                        <td>50</td>
-                        <td>Agres.id</td>
+                        <td><?php echo $urut ?></td>
+                        <td><?php echo $data['nama_barang']; ?></td>
+                        <td><?php echo $data['harga_barang']; ?></td>
+                        <td><?php echo $data['stok_barang']; ?></td>
+                        <td><?php echo $data['supplier']; ?></td>
+                        <td>
+                            <a href="?proses=edit&id=<?php echo $data['id'] ?>"><button class="btn btn-warning">edit</button></a>
+                            <a href="?proses=delete&id=<?php echo $data['id'] ?>"><button class="btn btn-danger">delete</button></a>
+                        </td>
                     </tr>
-                    
+                    <?php
+
+                    //increment variable $urut, sehingga nilainya bertambah 1 setiap kali looping
+                    $urut++;
+
+                    }
+                    ?>
                 </table>
             </div>
             <div class="col-2"></div>
         </div>
-
     </div><!-- ini adalah tutup div container -->
     <script src="bootstrap-5.2.0-dist/js/bootstrap.js"></script>
     </body>
